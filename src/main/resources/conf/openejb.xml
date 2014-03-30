@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<openejb>
+	<Resource id="jdbc/mysql/moon" type="javax.sql.DataSource">
+		JdbcDriver com.mysql.jdbc.Driver
+		JdbcUrl jdbc:mysql://localhost:3306/moon?useUnicode=true&amp;characterEncoding=UTF-8
+		UserName wuxin
+		Password root
+	</Resource>
+	<Resource id="jmsResourceAdapter" type="ActiveMQResourceAdapter">
+		BrokerXmlConfig broker:(tcp://localhost:8082)?useJmx=false
+        ServerUrl tcp://localhost:8082
+	</Resource>
+	<Resource id="connectionFactory" type="javax.jms.ConnectionFactory">
+		ResourceAdapter jmsResourceAdapter
+	</Resource>
+	<Resource id="queue" type="javax.jms.Queue"/>
+</openejb>
