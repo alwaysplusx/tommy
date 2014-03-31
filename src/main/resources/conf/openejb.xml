@@ -14,4 +14,12 @@
 		ResourceAdapter jmsResourceAdapter
 	</Resource>
 	<Resource id="queue" type="javax.jms.Queue"/>
+	<Resource id="mailSession" type="javax.mail.Session">
+		mail.smtp.host smtp.126.com 
+		mail.smtp.port 25 
+		mail.transport.protocol smtp
+		mail.smtp.auth true 
+		mail.smtp.user tomeejee 
+		password abc123 
+	</Resource>
 </openejb>
