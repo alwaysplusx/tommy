@@ -1,21 +1,18 @@
 ### Java Message Service Example
-#### openejb.xml
-	
-	详细配置位于openejb-core.jar
-		/META-INF/org/apache/openejb/service-jar.xml
+#### openejb.xml 详细配置位于openejb-core.jar /META-INF/org/apache/openejb/service-jar.xml
 
-	##### 配置ActiveMQResourceAdapter
+	<!-- 配置ActiveMQResourceAdapter -->
 	<Resource id="jmsResourceAdapter" type="ActiveMQResourceAdapter">
 		BrokerXmlConfig broker:(tcp://localhost:8082)?useJmx=false
         ServerUrl tcp://localhost:8082
 	</Resource>
 	
-	##### 配置ConnectionFactory
+	<!-- 配置ConnectionFactory -->
 	<Resource id="connectionFactory" type="javax.jms.ConnectionFactory">
 		ResourceAdapter jmsResourceAdapter
 	</Resource>
 	
-	##### 配置Destination(Queue)
+	<!-- 配置Destination(Queue) -->
 	<Resource id="queue" type="javax.jms.Queue"/>
 
 #### SendMessage
