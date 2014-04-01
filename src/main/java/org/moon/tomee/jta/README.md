@@ -1,7 +1,9 @@
 ### Java Transaction API
-#### EJB有两种的管理方式CMP(container managed persistence), BMP(bean managed persistence)
-	CMP简单易用由EJB容器管理,包含事务和缓存机制
-	BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动控制事务. 
+#### EJB有两种的管理方式CMP(container managed persistence), BMP(bean managed persistence) 
+
+CMP简单易用由EJB容器管理,包含事务和缓存机制 
+
+BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动控制事务. 
 	
 #### CMP
 
