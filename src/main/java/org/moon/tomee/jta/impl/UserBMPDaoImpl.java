@@ -41,7 +41,7 @@ public class UserBMPDaoImpl implements UserDao {
 
 	@Override
 	public void deleteUser(User user) {
-		user = em.find(User.class, user.getId());
+		user = em.find(User.class, user.getUserId());
 		try {
 			ux.begin();
 			em.remove(user);

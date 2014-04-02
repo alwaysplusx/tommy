@@ -26,7 +26,7 @@ public class UserCMPDaoImpl implements UserDao {
 
 	@Override
 	public void deleteUser(User user) {
-		em.remove(em.find(User.class, user.getId()));
+		em.remove(em.find(User.class, user.getUserId()));
 	}
 
 	@Override
