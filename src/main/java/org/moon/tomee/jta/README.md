@@ -36,6 +36,123 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 		}
 	}
 
+#### CMP与BMP相互引用时
+	BMPDao 引用 CMPDao 中的saveUser方法实际效果参见[@TransactionAttribute.REQUIRED](https://github.com/superwuxin/tommy-test/blob/master/src/main/java/org/moon/tomee/jta/README.md#transactionattributetyperequired-transactionattribute%E7%9A%84%E9%BB%98%E8%AE%A4%E5%80%BC)
+	CMPDao 引用 BMPDao 中的saveUser方法时,如果CMPDao中出现异常则BMPDao部分的逻辑无法回滚
+#### UserCMPDaoImpl.java
+
+	@Stateless
+	@TransactionManagement(TransactionManagementType.CONTAINER)
+	public class UserCMPDaoImpl implements UserDao {
+	
+		@PersistenceContext(unitName = "hibernate-moon")
+		private EntityManager em;
+		//引用BMP Dao
+		@EJB(beanName = "UserBMPDaoImpl")
+		private UserDao userDao;
+	
+		@Override
+		public void saveWithBMPDao(User user1, User user2) {
+			em.persist(user1);
+			userDao.saveUser(user2);
+		}
+	
+		@Override
+		public long count() {
+			return (long) em.createQuery("select count(o) from User o").getSingleResult();
+		}
+	
+		@Override
+		public void saveWithCMPDao(User user1, User user2) {
+			throw new RuntimeException("I'm CMP Dao");
+		}
+	
+		//some other code
+	}
+
+#### UserBMPDaoImpl.java
+
+	@Stateless
+	@TransactionManagement(TransactionManagementType.BEAN)
+	public class UserBMPDaoImpl implements UserDao {
+	
+		@PersistenceContext(unitName = "hibernate-moon")
+		private EntityManager em;
+		@Resource
+		private UserTransaction ux;
+		//引用CMP Dao
+		@EJB(beanName = "UserCMPDaoImpl")
+		private UserDao userDao;
+
+		@Override
+		public void saveWithCMPDao(User user1, User user2) {
+			try {
+				ux.begin();
+				em.persist(user1);
+				userDao.saveUser(user2);
+				ux.commit();
+			} catch (Exception e) {
+				e.printStackTrace();
+				try {
+					ux.rollback();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+	
+		@Override
+		public long count() {
+			return (long) em.createQuery("select count(o) from User o").getSingleResult();
+		}
+	
+		@Override
+		public void saveWithBMPDao(User user1, User user2) {
+			throw new RuntimeException("I'm BMP Dao");
+		}
+		
+		//some other code
+		
+	}
+
+#### UserDaoTest.java
+
+	public class UserDaoTest {
+	
+		private EJBContainer container;
+		
+		@EJB(beanName = "UserCMPDaoImpl")
+		private UserDao userCMPDao;
+		
+		@EJB(beanName = "UserBMPDaoImpl")
+		private UserDao userBMPDao;
+	
+		@Before
+		public void setUp() throws Exception {
+			Properties props = new Properties();
+			props.put("openejb.conf.file", "src/main/resources/conf/openejb.xml");
+			container = EJBContainer.createEJBContainer(props);
+			container.getContext().bind("inject", this);
+		}
+		
+		@Test
+		public void testSaveWithCMPDao(){
+			userBMPDao.saveWithCMPDao(new User("AAA"), new User("BBB"));
+			assertEquals("save with CMP Dao", 2l, userBMPDao.count());
+		}
+		
+		@Test
+		public void testSaveWithBMPDao(){
+			userCMPDao.saveWithBMPDao(new User("AAA"), new User("BBB"));
+			assertEquals("save with BMP Dao", 2l, userCMPDao.count());
+		}
+		
+		@After
+		public void tearDown() throws Exception {
+			container.close();
+		}
+	}
+
 ### @TransactionAttribute
 
 <i>`@TransactionAttribute`对于BMP类的Bean是无效的,在容器运行时会将BMP内的`@TransactionAttribute`注解忽略掉</i>
