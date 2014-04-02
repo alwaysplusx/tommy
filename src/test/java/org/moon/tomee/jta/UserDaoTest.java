@@ -1,12 +1,13 @@
 package org.moon.tomee.jta;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import java.util.Properties;
 
+import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.embeddable.EJBContainer;
+import javax.transaction.UserTransaction;
 
 import org.junit.After;
 import org.junit.Before;
@@ -21,6 +22,8 @@ public class UserDaoTest {
 	private UserDao userCMPDao;
 	@EJB(beanName = "UserBMPDaoImpl")
 	private UserDao userBMPDao;
+	@Resource
+	private UserTransaction ux;
 
 	@Before
 	public void setUp() throws Exception {
@@ -31,28 +34,47 @@ public class UserDaoTest {
 	}
 
 	@Test
+	@Ignore
 	public void testSaveUser() {
 		userCMPDao.saveUser(new User("AAA"));
 		userBMPDao.saveUser(new User("BBB"));
 		assertEquals("Save user with CMP & BMP", 2l, userBMPDao.count());
 	}
-
+	
 	@Test
 	@Ignore
-	public void testDeleteUser() {
-		fail("Not yet implemented");
+	public void testCMPSaveUser() throws Exception{
+		//ux.begin();
+		userCMPDao.saveUser(new User("AAA"));
+		//ux.commit();
+		assertEquals("Save user with CMP", 1l, userBMPDao.count());
 	}
 	
 	@Test
-	public void testCMPSaveWithOtherDao(){
-		userCMPDao.saveWithOtherDao(new User("AAA"), new User("BBB"));
-		assertEquals("Container manager Persistence", 2l, userCMPDao.count());
+	@Ignore
+	public void testCMPCount() throws Exception{
+		ux.begin();
+		userCMPDao.saveUser(new User("AAA"));;
+		ux.commit();
 	}
-
+	
 	@Test
-	public void testBMPSaveWithOtherDao(){
-		userBMPDao.saveWithOtherDao(new User("AAA"), new User("BBB"));
-		assertEquals("Bean manager Persistence Bean", 2l, userCMPDao.count());
+	@Ignore
+	public void testBMPSaveUser() throws Exception{
+		ux.begin();
+		userBMPDao.saveUser(new User("AAA"));
+		ux.commit();
+		assertEquals("Save user with BMP", 1l, userBMPDao.count());
+	}
+	
+	@Test
+	public void testSaveWithCMPDao(){
+		userBMPDao.saveWithCMPDao(new User("AAA"), new User("BBB"));
+		assertEquals("save with CMP Dao", 2l, userBMPDao.count());
+	}
+	
+	public void testSaveWithBMPDao(){
+		userCMPDao.saveWithBMPDao(new User("AAA"), new User("BBB"));
 	}
 	
 	@After

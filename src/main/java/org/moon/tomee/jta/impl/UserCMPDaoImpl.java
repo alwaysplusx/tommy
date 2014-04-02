@@ -30,7 +30,7 @@ public class UserCMPDaoImpl implements UserDao {
 	}
 
 	@Override
-	public void saveWithOtherDao(User user1, User user2) {
+	public void saveWithBMPDao(User user1, User user2) {
 		em.persist(user1);
 		userDao.saveUser(user2);
 	}
@@ -38,6 +38,11 @@ public class UserCMPDaoImpl implements UserDao {
 	@Override
 	public long count() {
 		return (long) em.createQuery("select count(o) from User o").getSingleResult();
+	}
+
+	@Override
+	public void saveWithCMPDao(User user1, User user2) {
+		throw new RuntimeException("I'm CMP Dao");
 	}
 
 }

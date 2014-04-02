@@ -3,8 +3,6 @@ package org.moon.tomee.jta.impl;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.persistence.EntityManager;
@@ -26,7 +24,6 @@ public class UserBMPDaoImpl implements UserDao {
 	private UserDao userDao;
 
 	@Override
-	@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 	public void saveUser(User user) {
 		try {
 			ux.begin();
@@ -40,7 +37,6 @@ public class UserBMPDaoImpl implements UserDao {
 				e1.printStackTrace();
 			}
 		}
-		
 	}
 
 	@Override
@@ -61,12 +57,12 @@ public class UserBMPDaoImpl implements UserDao {
 	}
 
 	@Override
-	public void saveWithOtherDao(User user1, User user2) {
+	public void saveWithCMPDao(User user1, User user2) {
 		try {
 			ux.begin();
 			em.persist(user1);
-			ux.commit();
 			userDao.saveUser(user2);
+			ux.commit();
 		} catch (Exception e) {
 			e.printStackTrace();
 			try {
@@ -80,6 +76,11 @@ public class UserBMPDaoImpl implements UserDao {
 	@Override
 	public long count() {
 		return (long) em.createQuery("select count(o) from User o").getSingleResult();
+	}
+
+	@Override
+	public void saveWithBMPDao(User user1, User user2) {
+		throw new RuntimeException("I'm BMP Dao");
 	}
 
 }
