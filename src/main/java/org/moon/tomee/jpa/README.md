@@ -12,9 +12,183 @@ ID的生成策略有多种 `GenerationType.IDENTITY` `GenerationType.AUTO` `Gene
 
 #### 一对一`@OneToOne`
 
-#### 一对多` @OneToMany` `@ManyToOne`  
+##### Person.java
 
+	@Entity
+	@Table(name = "t_person")
+	public class Person implements Serializable {
+	
+		private static final long serialVersionUID = 1L;
+		@Id
+		@GeneratedValue(strategy = GenerationType.IDENTITY)
+		private Long personId;
+		private String name;
+		@OneToOne(mappedBy = "person", cascade = { CascadeType.ALL })
+		private Passport passport;
+		
+		//getter setter
+	}
+
+##### Passport.java
+
+	@Entity
+	@Table(name = "t_passport")
+	public class Passport implements Serializable {
+	
+		private static final long serialVersionUID = 1L;
+		@Id
+		@GeneratedValue(strategy = GenerationType.IDENTITY)
+		private Long passportId;
+		private String country;
+		@OneToOne(cascade = { CascadeType.DETACH })
+		@JoinColumn(name = "personId", referencedColumnName = "personId")
+		private Person person;
+		
+		//getter setter
+	}
+
+##### Person Passport 对应表结构
+	
+	CREATE TABLE t_person (
+	  personId bigint(20) NOT NULL auto_increment,
+	  name varchar(255) default NULL,
+	  PRIMARY KEY  (personId)
+	);
+	
+	CREATE TABLE t_passport (
+	  passportId bigint(20) NOT NULL auto_increment,
+	  country varchar(255) default NULL,
+	  personId bigint(20) default NULL,
+	  PRIMARY KEY  (passportId),
+	  KEY FK_m2cmx2fwtt0i8y07h9bnr0elt (personId)
+	);
+
+#### 一对多` @OneToMany` `@ManyToOne`
+
+##### Order.java
+
+	@Entity
+	@Table(name = "t_order")
+	public class Order implements Serializable {
+	
+		private static final long serialVersionUID = 1L;
+		@Id
+		@GeneratedValue(strategy = GenerationType.IDENTITY)
+		private Long orderId;
+		private String SerialNo;
+		@Temporal(TemporalType.TIMESTAMP)
+		private Date createTime;
+		@OneToMany(mappedBy = "order", cascade = { CascadeType.ALL })
+		private Collection<OrderItem> items;
+		
+		//getter setter
+	}
+	
+##### OrderItem.java
+
+	@Entity
+	@Table(name = "t_orderItem")
+	public class OrderItem implements Serializable {
+	
+		private static final long serialVersionUID = 1L;
+		@Id
+		@GeneratedValue(strategy = GenerationType.IDENTITY)
+		private Long itemId;
+		private String itemName;
+		@ManyToOne(cascade = { CascadeType.DETACH })
+		@JoinColumn(name = "orderId", referencedColumnName = "orderId")
+		private Order order;
+		
+		//getter setter
+	}		
+	
+##### Order OrderItem 对应表结构
+
+	CREATE TABLE t_order (
+	  orderId bigint(20) NOT NULL auto_increment,
+	  SerialNo varchar(255) default NULL,
+	  createTime datetime default NULL,
+	  PRIMARY KEY  (orderId)
+	);
+	
+	
+	CREATE TABLE t_orderitem (
+	  itemId bigint(20) NOT NULL auto_increment,
+	  itemName varchar(255) default NULL,
+	  orderId bigint(20) default NULL,
+	  PRIMARY KEY  (itemId),
+	  KEY FK_3utxcx17lbsodl51xj5lum7ub (orderId)
+	);	
+	
 #### 多对多` @ManyToMany`
+
+##### Teacher.java
+
+	@Entity
+	@Table(name = "t_teacher")
+	public class Teacher implements Serializable {
+	
+		private static final long serialVersionUID = 1L;
+		@Id
+		@GeneratedValue(strategy = GenerationType.IDENTITY)
+		private Long teacherId;
+		private String teacherName;
+		@ManyToMany
+		@JoinTable(
+			name = "t_teacher_student", 
+			joinColumns = { @JoinColumn(name = "teacherId", referencedColumnName = "teacherId") }, 
+			inverseJoinColumns = { @JoinColumn(name = "studentId", referencedColumnName = "studentId") }
+		)
+		private Collection<Student> students;
+	
+		//getter setter
+	}	
+
+##### Student.java
+
+	@Entity
+	@Table(name = "t_student")
+	public class Student implements Serializable {
+	
+		private static final long serialVersionUID = 1L;
+		@Id
+		@GeneratedValue(strategy = GenerationType.IDENTITY)
+		private Long studentId;
+		private String studentName;
+		@ManyToMany(mappedBy = "students")
+		private Collection<Teacher> teachers;
+		
+		//getter setter
+	}
+	
+##### Teacher Student 对应表结构
+
+	CREATE TABLE t_teacher (
+	  teacherId bigint(20) NOT NULL auto_increment,
+	  teacherName varchar(255) default NULL,
+	  PRIMARY KEY  (teacherId)
+	);
+	
+	CREATE TABLE t_student (
+	  studentId bigint(20) NOT NULL auto_increment,
+	  studentName varchar(255) default NULL,
+	  PRIMARY KEY  (studentId)
+	);
+	
+	CREATE TABLE t_teacher_student (
+	  teacherId bigint(20) NOT NULL,
+	  studentId bigint(20) NOT NULL,
+	  KEY FK_9nqofr30yvta09oo0l7esk7o1 (studentId),
+	  KEY FK_s745w6jseag65iv8n0c05pqly (teacherId)
+	);	
+
+### Entity中各个注解及注解属性说明
+
+CascadeType
+
+FetchType
+
+......
 
 ### javax.persistence.EntityManagerFactory
 
