@@ -11,6 +11,7 @@ import javax.naming.NamingException;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class MailHandlerTest {
@@ -36,10 +37,19 @@ public class MailHandlerTest {
 	}
 	
 	@Test
-	public void testSendMain() {
-		assertEquals(true, mailHandler.sendMain(new Mail("tomeejee@126.com","870757543@qq.com","Hello World!","Hi")));
+	@Ignore
+	public void testSendTextMail(){
+		SimpleMail mail = new SimpleMail("tomeejee@126.com", new String[]{"870757543@qq.com"},"Come On","I Support You");
+		mail.setAttachFileNames(new String[]{"D:/a.txt"});
+		assertEquals(true, mailHandler.sendTextMain(mail));
 	}
-
+	
+	@Test
+	public void testSendHtmlMail(){
+		HtmlTempletMail mail = new HtmlTempletMail("tomeejee@126.com",new String[]{"870757543@qq.com"},"Html Mail","src/main/resources/mailMessageTemplet.xml",new Object[]{"wuxin"});
+		assertEquals(true, mailHandler.sendHtmlTempletMail(mail));
+	}
+	
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		container.close();

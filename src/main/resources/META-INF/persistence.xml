@@ -8,15 +8,15 @@
 		<provider>org.hibernate.ejb.HibernatePersistence</provider>
 		<jta-data-source>jdbc/mysql/moon</jta-data-source>
 		<properties>
-			<!-- <property name="hibernate.hbm2ddl.auto" value="create"/> -->
+			<property name="hibernate.hbm2ddl.auto" value="create"/>
 			<property name="hibernate.show_sql" value="true"/>
 		</properties>
 	</persistence-unit>
-	<persistence-unit name="eclipselink-moon" transaction-type="JTA">
+	<!-- <persistence-unit name="eclipselink-moon" transaction-type="JTA">
 		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
 		<jta-data-source>jdbc/mysql/moon</jta-data-source>
 		<properties>
 			<property name="eclipselink.ddl-generation" value="drop-and-create-tables" />
 		</properties>	
-	</persistence-unit>
+	</persistence-unit> -->
 </persistence>
