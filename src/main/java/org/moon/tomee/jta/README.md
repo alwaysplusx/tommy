@@ -37,8 +37,11 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 	}
 
 #### CMP与BMP相互引用时
-	BMPDao 引用 CMPDao 中的saveUser方法实际效果参见[@TransactionAttribute.REQUIRED](https://github.com/superwuxin/tommy-test/blob/master/src/main/java/org/moon/tomee/jta/README.md#transactionattributetyperequired-transactionattribute%E7%9A%84%E9%BB%98%E8%AE%A4%E5%80%BC)
-	CMPDao 引用 BMPDao 中的saveUser方法时,如果CMPDao中出现异常则BMPDao部分的逻辑无法回滚
+
+BMPDao 引用 CMPDao 中的saveUser方法实际效果参见[@TransactionAttribute.REQUIRED](https://github.com/superwuxin/tommy-test/blob/master/src/main/java/org/moon/tomee/jta/README.md#transactionattributetyperequired-transactionattribute%E7%9A%84%E9%BB%98%E8%AE%A4%E5%80%BC)
+
+CMPDao 引用 BMPDao 中的saveUser方法时,如果CMPDao中出现异常则BMPDao部分的逻辑无法回滚
+
 #### UserCMPDaoImpl.java
 
 	@Stateless
@@ -115,7 +118,7 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 		
 	}
 
-#### UserDaoTest.java
+#### UserDaoTest.java 均能正常保存
 
 	public class UserDaoTest {
 	
