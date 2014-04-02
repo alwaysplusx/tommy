@@ -45,7 +45,7 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 
 所以下文均是对CMP类的Bean进行说明
 
-#### `TransactionAttributeType.REQUIRED` @TransactionAttribute的默认值
+#### TransactionAttributeType.REQUIRED @TransactionAttribute的默认值
 
 如果客户端已经存在一个事务,那么使用客户端的事务.否则新建一个事务来管理被调用的方法
 
@@ -101,8 +101,8 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 			container.close();
 		}
 	}
-	
-#### `TransactionAttributeType.MANDATORY` 
+
+#### TransactionAttributeType.MANDATORY
 
 强制要求客户端调用时已经存在一个事务,被调用的方法运行在客户端的事务中.如果客户端中不存在事务则调用异常
 
@@ -112,7 +112,7 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 		ux.commit();
 	}
 
-#### CMP中声明方法为`MANDATORY` 直接调用失败 
+#### CMP中声明方法为`MANDATORY` 直接调用失败  客户端中手动事务调用正常
 
 	@Stateless
 	@TransactionManagement(TransactionManagementType.CONTAINER)
@@ -156,7 +156,7 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 		}
 	}
 
-#### `TransactionAttributeType.REQUEST_NEW` 
+#### TransactionAttributeType.REQUEST_NEW
 
 方法将在一个新的事务中执行,如果客户端中已经在一个事务中,则暂停旧的事务.在客户端无法回滚REQUEST_NEW的事务
 
@@ -267,7 +267,7 @@ Tip:调用声明为SUPPORTS的方法,如果该方法是需要提交事务的.那
 	}	
 
 	
-#### `TransactionAttributeType.NOT_SUPPORTED` 
+#### TransactionAttributeType.NOT_SUPPORTED
 
 如果客户端调用一个声明为`NOT_SUPPORTED`无事务需求的方法,客户端有无事务都可正常调用
 
@@ -275,7 +275,7 @@ Tip:调用声明为SUPPORTS的方法,如果该方法是需要提交事务的.那
 
 所以`NOT_SUPPORTED`的方法内部不能存在有事务需求的代码
 
-#### CMP中声明方法为`NOT_SUPPORTED`,直接调用正常,UserTransaction调用异常	
+#### CMP中声明方法为`NOT_SUPPORTED` 无事务需求的方法 直接调用正常 UserTransaction调用异常
 
 	@Override
 	//这个声明是不正确的
@@ -335,7 +335,7 @@ Tip:调用声明为SUPPORTS的方法,如果该方法是需要提交事务的.那
 
 Tip:声明为`NEVER`的方法内部也不能存在有事务需求的代码
 
-#### CMP中声明方法为`NEVER`,直接调用正常,UserTransaction调用异常
+#### CMP中声明方法为`NEVER` 无事务需求的方法 直接调用正常 UserTransaction调用异常
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.NEVER)
