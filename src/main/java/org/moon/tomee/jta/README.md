@@ -7,7 +7,7 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 
 ### @TransactionManagement
 
-##### UserCMPDaoImpl.java `TransactionManagementType.CONTAINER`声明为CMP管理方式
+#### UserCMPDaoImpl.java `TransactionManagementType.CONTAINER`声明为CMP管理方式
 
 	@Stateless
 	@TransactionManagement(TransactionManagementType.CONTAINER)
@@ -15,7 +15,7 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 		//some code
 	}
 	
-##### UserBMPDaoImpl.java `TransactionManagementType.BEAN`声明为BMP管理方式
+#### UserBMPDaoImpl.java `TransactionManagementType.BEAN`声明为BMP管理方式
 
 	@Stateless
 	@TransactionManagement(TransactionManagementType.BEAN)
@@ -40,12 +40,12 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 
 <i>`@TransactionAttribute`对于BMP类的Bean是无效的,在容器运行时会将BMP内的`@TransactionAttribute`注解忽略掉</i>
 
-##### RUNNING
+#### RUNNING
 	WARNING - WARN ... UserBMPDaoImpl:	Ignoring 1 invalid @TransactionAttribute annotations.  Bean not using Container-Managed Transactions.
 
 所以下文均是对CMP类的Bean进行说明
 
-##### `TransactionAttributeType.REQUIRED` @TransactionAttribute的默认值
+#### `TransactionAttributeType.REQUIRED` @TransactionAttribute的默认值
 
 如果客户端已经存在一个事务,那么使用客户端的事务.否则新建一个事务来管理被调用的方法
 
@@ -56,9 +56,9 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 		//REQUIRED保存的对象被回滚了
 	}
 
-##### `TransactionAttributeType.MANDATORY` 
+#### `TransactionAttributeType.MANDATORY` 
 
-强制声明客户端调用时已经存在一个事务,被调用的方法运行在客户端的事务中
+强制要求客户端调用时已经存在一个事务,被调用的方法运行在客户端的事务中
 
 	{
 		ux.begin();
@@ -66,7 +66,7 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 		ux.commit();
 	}
 
-##### CMP中声明方法为`MANDATORY`,直接调用失败 
+#### CMP中声明方法为`MANDATORY`,直接调用失败 
 
 	@Stateless
 	@TransactionManagement(TransactionManagementType.CONTAINER)
@@ -80,7 +80,7 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 		
 	}
 	
-##### UserDaoTest.java 
+#### UserDaoTest.java 
 
 	public class UserDaoTest {
 	
@@ -110,9 +110,9 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 		}
 	}
 
-##### `TransactionAttributeType.REQUEST_NEW` 
+#### `TransactionAttributeType.REQUEST_NEW` 
 
-方法将在一个新的事务中执行，如果调用者/client的方法已经在一个事务中，则暂停旧的事务.在客户端无法回滚REQUEST_NEW的事务
+方法将在一个新的事务中执行,如果客户端中已经在一个事务中,则暂停旧的事务.在客户端无法回滚REQUEST_NEW的事务
 
 	{
 		ux.begin();
@@ -121,7 +121,7 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 		//结果为无法回滚REQUEST_NEW方法中保存的对象
 	}
 
-##### CMP中声明方法为`REQUEST_NEW`,直接调用正常
+#### CMP中声明方法为`REQUEST_NEW`,直接调用正常
 		
 		@Override
 		@TransactionAttribute(TransactionAttributeType.REQUEST_NEW)
@@ -129,7 +129,7 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 			em.persist(user);
 		}
 		
-##### UserDaoTest.java 
+#### UserDaoTest.java 
 
 	public class UserDaoTest {
 	
@@ -161,12 +161,14 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 			container.close();
 		}
 	}
+	
+>`TransactionAttributeType.NOT_SUPPORTED`与`TransactionAttributeType.NEVER`的异同点在于:如果一个不需要事务的方法被声明为NOT_SUPPORTED,客户端存在事务的时候调用无异常.而被声明为NEVER的相同方法则异常退出
 		
-##### TransactionAttributeType.SUPPORTS
+#### TransactionAttributeType.SUPPORTS
 
-如果客户端中存在事务则使用客户端的事务,否则被嗲用的方法不使用事务.
+如果客户端中存在事务则使用客户端的事务,否则被调用的方法不使用事务也不创建事务.
 
-调用SUPPORTS的方法,如果该方法是需要提交事务的.那么客户端调用者一定要开启手动事务
+调用声明为SUPPORTS的方法,如果该方法是需要提交事务的.那么客户端调用者一定要开启手动事务
 	
 	{
 		ux.begin();
@@ -176,14 +178,14 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 		ux.commit();
 	}
 	
-##### CMP中声明方法为`SUPPORTS`,直接调用异常
+#### CMP中声明方法为`SUPPORTS`,直接调用异常
 	
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public void saveUser(User user) {
 		em.persist(user);
 	}
 	
-##### UserDaoTest.java 
+#### UserDaoTest.java 
 
 	public class UserDaoTest {
 	
@@ -220,11 +222,11 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 		}
 	}	
 
-##### `TransactionAttributeType.NOT_SUPPORTED` 
+#### `TransactionAttributeType.NOT_SUPPORTED` 
 
 如果方法在客户端事务中被调用，将抛出一个错误.同时`NOT_SUPPORTED`的方法内部也不能存在有事务需求的代码
 
-##### CMP中声明方法为`NEVER`,直接调用正常,UserTransaction调用异常	
+#### CMP中声明方法为`NOT_SUPPORTED`,直接调用正常,UserTransaction调用异常	
 
 	@Override
 	//这个声明是不正确的
@@ -239,7 +241,7 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 		return (long) em.createQuery("select count(o) from User o").getSingleResult();
 	}
 	
-##### UserDaoTest.java 
+#### UserDaoTest.java 
 
 	public class UserDaoTest {
 	
@@ -278,11 +280,11 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 		}
 	}
 
-##### TransactionAttributeType.NEVER
+#### TransactionAttributeType.NEVER
 
 客户端不能存在事务,声明为`NEVER`的方法内部也不能存在有事务需求的代码
 
-##### CMP中声明方法为`NEVER`,直接调用正常,UserTransaction调用异常
+#### CMP中声明方法为`NEVER`,直接调用正常,UserTransaction调用异常
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.NEVER)
@@ -290,7 +292,7 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 		return (long) em.createQuery("select count(o) from User o").getSingleResult();
 	}
 	
-##### UserDaoTest.java 
+#### UserDaoTest.java 
 
 	public class UserDaoTest {
 	
@@ -325,7 +327,4 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 			container.close();
 		}
 	}
-	
->`TransactionAttributeType.NOT_SUPPORTED`与`TransactionAttributeType.NEVER`的异同点在于:如果一个不需要事务的方法被声明为NOT_SUPPORTED,客户端存在事务的时候调用无异常.而被声明为NEVER的相同方法则异常退出
-	
 	
