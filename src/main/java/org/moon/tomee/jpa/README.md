@@ -1,14 +1,22 @@
 ### Java Persistence API
 
-#### 实体Bean(Entity Bean) 
+### 实体Bean(Entity Bean) 
 
-通过注解 `@Entity`将该类解析为实体Bean,在通过`@Table`中的`name`属性关联数据库表名.每个Entity Bean都必须指定`@Id`.
+通过注解 `@Entity`将一个类解析为实体Bean,在通过`@Table`中的`name`属性关联数据库表.
 
-Id的生产类型有多种 `GenerationType.IDENTITY` `GenerationType.AUTO` `GenerationType.SEQUENCE` `GenerationType.TABLE` 
+每个Entity Bean都必须指定`@Id`.
 
-数据库表关系的对应一对一`@OneToOne`  一对多` @OneToMany` `@ManyToOne`  多对多` @ManyToMany`
+ID的生成策略有多种 `GenerationType.IDENTITY` `GenerationType.AUTO` `GenerationType.SEQUENCE` `GenerationType.TABLE` 
 
-#### javax.persistence.EntityManagerFactory
+### 数据库表关系的对应
+
+#### 一对一`@OneToOne`
+
+#### 一对多` @OneToMany` `@ManyToOne`  
+
+#### 多对多` @ManyToMany`
+
+### javax.persistence.EntityManagerFactory
 
 JPA使用时通过`Persistence.createEntityManagerFactory(persistenceUnitName)`创建EntityManagerFactory. 
 
@@ -18,7 +26,7 @@ Persistence通过配置文件`classpath:/META-INF/persistence.xml`查找指定�
 
 <i>EntityManagerFactory为线程安全的可以在多线程中被共享</i>
 
-#### javax.persistence.EntityManager
+### javax.persistence.EntityManager
 
 通过`EntityManagerFactory.createEntityManager()`来创建EntityManager
 

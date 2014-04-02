@@ -39,8 +39,8 @@ public class UserRepositoryTest {
 		user.setUsername("BBB");
 		userRepository.updateUser(user);
 		assertEquals("username equals BBB size", 1, userRepository.findUserByUsername("BBB").size());
-		assertEquals("after update user", "BBB", userRepository.findUserById(user.getId()).getUsername());
-		userRepository.deleteUser(userRepository.findUserById(user.getId()));
+		assertEquals("after update user", "BBB", userRepository.findUserById(user.getUserId()).getUsername());
+		userRepository.deleteUser(userRepository.findUserById(user.getUserId()));
 		assertEquals("after delete user", 0l, userRepository.count());
 	}
 
