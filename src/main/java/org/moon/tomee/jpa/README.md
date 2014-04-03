@@ -112,7 +112,8 @@ ID的生成策略有多种 `GenerationType.IDENTITY` `GenerationType.AUTO` `Gene
 多对多中一般不指定级联操作,维护端与被维护端的关系可以相互转换.
 
 > 由于不设置级联操作也就cascade = [CascadeTyoe.DETACH](https://github.com/superwuxin/tommy-test/tree/master/src/main/java/org/moon/tomee/jpa#cascadetype).要注意保存关系的维护端时如果被维护端不为空,那么被维护端必须事先存在
-(e.g. Teacher为关系的维护者,Teacher中包含了students集合对象.当保存Teacher时,该对象内的students必须已经存在(也就对于关系表t_teacher_studet中的studentId的这一外键必须存在)否则保存失败
+
+> e.g. Teacher为关系的维护者,Teacher中包含了students集合对象.当保存Teacher时,该对象内的students必须已经存在(也就对于关系表t_teacher_studet中的studentId的这一外键必须存在)否则保存失败
 
 > 逻辑上而言:多对多关系的绑定/解除由维护端来完成,被维护端不能绑定/解除多对多的关系
 
