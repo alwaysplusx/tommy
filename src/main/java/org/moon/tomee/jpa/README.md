@@ -12,6 +12,10 @@ ID的生成策略有多种 `GenerationType.IDENTITY` `GenerationType.AUTO` `Gene
 
 #### 一对一`@OneToOne`
 
+关系<strong>维护端</strong>配置一个`mappedBy`引用<strong>被维护端</strong>中的对象.
+
+关系<strong>被维护端</strong>中使用`@JoinColumn`配置一个外键引用关系的<strong>维护端</strong>
+
 ##### Person.java
 
 	@Entity
