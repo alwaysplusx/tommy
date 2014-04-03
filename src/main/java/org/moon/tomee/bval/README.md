@@ -47,5 +47,56 @@ javax.validation.constraints包下包括`@NotNull` `@Null` `@Size` `@Min` `@Max`
 		}
 	}
 
+### Foo.java
+
+Foo中zipCode使用`@ZipCode`表明该值需要检验
+
+	public class Foo {
+		@NotNull(message = "foo.name can't be null ")
+		private String name;
+		@ZipCode
+		private String zipCode;
+		//some other code
+	}	
+
+### FooTest.java
+
+通过`javax.validation.Validation`可以加载类路径下的具体Bean Validation实现
+
+	public class FooTest {
+		
+		private Validator validator; 
+		
+		@Before
+		public void setUp() throws Exception {
+			validator = Validation.buildDefaultValidatorFactory().getValidator();
+		}
+	
+		@Test
+		public void testFoo() {
+			Foo foo = new Foo();
+			foo.setName("foo1");
+			foo.setZipCode("ABC");
+			Set<ConstraintViolation<Foo>> cvs = validator.validate(foo);
+			assertEquals("constraint violation size is 1?", 1, cvs.size());
+			for (ConstraintViolation<?> cv : cvs) {
+				assertEquals("violation message is?", ZipCode.MESSAGE, cv.getMessage());
+			}
+		}
+	
+		@After
+		public void tearDown() throws Exception {
+		}
+	}
+
+`@Valid`级联检验
+
+Bar内定义了Foo,使用`@Valid`注解当检验Bar时将会级联检验Foo是否符合要求
+
+	public class Bar {
+		@Valid
+		private Foo foo;
+	}
+
 
 	
