@@ -2,7 +2,9 @@
 
 ### 实体Bean(Entity Bean) 
 
-通过注解 `@Entity`将一个类解析为实体Bean,在通过`@Table`中的`name`属性关联数据库表.
+通过注解 `@Entity`将一个类解析为实体Bean 
+
+在通过`@Table`中的`name`属性关联数据库表.
 
 每个Entity Bean都必须指定`@Id`.
 
@@ -12,43 +14,31 @@ ID的生成策略有多种 `GenerationType.IDENTITY` `GenerationType.AUTO` `Gene
 
 #### 一对一`@OneToOne`
 
-关系<strong>维护端</strong>配置一个`mappedBy`引用<strong>被维护端</strong>中的对象.
+##### Person.java 关系的维护端
 
-关系<strong>被维护端</strong>中使用`@JoinColumn`配置一个外键引用关系的<strong>维护端</strong>
+使用`OneToOne`注解 
 
-##### Person.java
+关系维护端配置一个`mappedBy`引用被维护端内的自己.
 
 	@Entity
-	@Table(name = "t_person")
-	public class Person implements Serializable {
-	
-		private static final long serialVersionUID = 1L;
-		@Id
-		@GeneratedValue(strategy = GenerationType.IDENTITY)
-		private Long personId;
-		private String name;
-		@OneToOne(mappedBy = "person", cascade = { CascadeType.ALL })
+	public class Person {
+		@OneToOne(mappedBy = "person")
 		private Passport passport;
-		
-		//getter setter
+		//some other code
 	}
 
-##### Passport.java
+##### Passport.java 被维护端
 
-	@Entity
-	@Table(name = "t_passport")
-	public class Passport implements Serializable {
+使用`OneToOne`注解 
+
+关系被维护端中使用`@JoinColumn`配置一个外键引用关系的维护端:在Passport表中添加一个personId引用Person中的personId
 	
-		private static final long serialVersionUID = 1L;
-		@Id
-		@GeneratedValue(strategy = GenerationType.IDENTITY)
-		private Long passportId;
-		private String country;
-		@OneToOne(cascade = { CascadeType.DETACH })
+	@Entity
+	public class Passport {
+		@OneToOne
 		@JoinColumn(name = "personId", referencedColumnName = "personId")
 		private Person person;
-		
-		//getter setter
+		//some other code
 	}
 
 ##### Person Passport 对应表结构
@@ -69,41 +59,30 @@ ID的生成策略有多种 `GenerationType.IDENTITY` `GenerationType.AUTO` `Gene
 
 #### 一对多` @OneToMany` `@ManyToOne`
 
-##### Order.java
+##### Order.java 一方 关系的维护端
+
+一方中使用`@OneToMany`注解 
+
+属性`mappedBy`指定多方内的自己
 
 	@Entity
-	@Table(name = "t_order")
-	public class Order implements Serializable {
-	
-		private static final long serialVersionUID = 1L;
-		@Id
-		@GeneratedValue(strategy = GenerationType.IDENTITY)
-		private Long orderId;
-		private String SerialNo;
-		@Temporal(TemporalType.TIMESTAMP)
-		private Date createTime;
-		@OneToMany(mappedBy = "order", cascade = { CascadeType.ALL })
+	public class Order {
+		@OneToMany(mappedBy = "order")
 		private Collection<OrderItem> items;
-		
-		//getter setter
+		//some other code
 	}
 	
-##### OrderItem.java
+##### OrderItem.java 多方 关系的被维护端
+
+多方中使用`ManyToOne`注解
+
+并使用`@JoinColumn`配置一个外键引用:在OrderItem表中加一个字段orderId外键引用Order内的OrderId
 
 	@Entity
-	@Table(name = "t_orderItem")
-	public class OrderItem implements Serializable {
-	
-		private static final long serialVersionUID = 1L;
-		@Id
-		@GeneratedValue(strategy = GenerationType.IDENTITY)
-		private Long itemId;
-		private String itemName;
-		@ManyToOne(cascade = { CascadeType.DETACH })
+	public class OrderItem {
+		@ManyToOne
 		@JoinColumn(name = "orderId", referencedColumnName = "orderId")
-		private Order order;
-		
-		//getter setter
+		//some other code
 	}		
 	
 ##### Order OrderItem 对应表结构
@@ -126,17 +105,20 @@ ID的生成策略有多种 `GenerationType.IDENTITY` `GenerationType.AUTO` `Gene
 	
 #### 多对多` @ManyToMany`
 
-##### Teacher.java
+多对多通过一个关系表来指定两方之间的多对多的关系,关联时通过`@JoinTable`来指定关联的表.
+
+多对多中一般不指定级联操作,维护端与被维护端的关系可以任意指定.
+
+>逻辑上而言:多对多关系的绑定/解除由维护端来完成,被维护端不能绑定/解除多对多的关系
+
+##### Teacher.java 关系的维护端
+
+使用`@ManyToMany`注解
+
+并使用`@JoinTable`配置一个关系表 `@JoinTable.name`指定关系表的表名 `@JoinTable.joinColumn`指定关系维护端的引用 `@JoinTable.inverseJoinColumns`指定关系被维护端的引用
 
 	@Entity
-	@Table(name = "t_teacher")
-	public class Teacher implements Serializable {
-	
-		private static final long serialVersionUID = 1L;
-		@Id
-		@GeneratedValue(strategy = GenerationType.IDENTITY)
-		private Long teacherId;
-		private String teacherName;
+	public class Teacher {
 		@ManyToMany
 		@JoinTable(
 			name = "t_teacher_student", 
@@ -144,25 +126,20 @@ ID的生成策略有多种 `GenerationType.IDENTITY` `GenerationType.AUTO` `Gene
 			inverseJoinColumns = { @JoinColumn(name = "studentId", referencedColumnName = "studentId") }
 		)
 		private Collection<Student> students;
-	
-		//getter setter
+		//some other code
 	}	
 
-##### Student.java
+##### Student.java 被维护端
+
+使用`@ManyToMany`注解 
+
+`@ManyToMany.mappedBy`指定维护端内部的自己
 
 	@Entity
-	@Table(name = "t_student")
-	public class Student implements Serializable {
-	
-		private static final long serialVersionUID = 1L;
-		@Id
-		@GeneratedValue(strategy = GenerationType.IDENTITY)
-		private Long studentId;
-		private String studentName;
+	public class Student {
 		@ManyToMany(mappedBy = "students")
 		private Collection<Teacher> teachers;
-		
-		//getter setter
+		//some other code
 	}
 	
 ##### Teacher Student 对应表结构
