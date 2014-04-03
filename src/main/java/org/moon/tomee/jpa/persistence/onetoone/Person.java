@@ -19,8 +19,15 @@ public class Person implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long personId;
 	private String name;
-	@OneToOne(mappedBy = "person", cascade = { CascadeType.ALL })
+	@OneToOne(mappedBy = "person", cascade = { CascadeType.PERSIST })
 	private Passport passport;
+
+	public Person() {
+	}
+
+	public Person(String name) {
+		this.name = name;
+	}
 
 	public Long getPersonId() {
 		return personId;
@@ -44,6 +51,11 @@ public class Person implements Serializable {
 
 	public void setPassport(Passport passport) {
 		this.passport = passport;
+	}
+
+	@Override
+	public String toString() {
+		return "Person [personId=" + personId + ", name=" + name + "]";
 	}
 
 }
