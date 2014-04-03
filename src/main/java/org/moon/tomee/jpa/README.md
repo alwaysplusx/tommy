@@ -57,6 +57,8 @@ ID的生成策略有多种 `GenerationType.IDENTITY` `GenerationType.AUTO` `Gene
 	  KEY FK_m2cmx2fwtt0i8y07h9bnr0elt (personId)
 	);
 
+>关系配置要讲求实际 如:可以因为一个人而创建一个新的护照,而不能因为一个护照而重新创建一个人.
+
 #### 一对多` @OneToMany` `@ManyToOne`
 
 ##### Order.java 一方 关系的维护端
@@ -163,13 +165,25 @@ ID的生成策略有多种 `GenerationType.IDENTITY` `GenerationType.AUTO` `Gene
 	  KEY FK_s745w6jseag65iv8n0c05pqly (teacherId)
 	);	
 
-### Entity中各个注解及注解属性说明
+### JPA中各个注解及注解属性说明
 
-CascadeType
+`@Entity` 将类解析为一个实体Bean,属性`name`(可选)指定Entity Bean的名称
 
-FetchType
+Tip:如指定了`name`属性值,那么JPQL语句查询时就应为指定的name值
 
-......
+`@Table`(可选) 与数据库/数据库表对应,如不指定则类名即为表名,属性`UniqueConstraint`可指定表字段的唯一性约束
+
+`@OneToOne` `ManyToOne` `OneToMany` `@ManyToMany`关系注解,用于实体Bean中的关系映射
+
+属性 `cascade`对应类型为 `CascadeType`
+
+CascadeType.ALL 		全关联			CascadeType.PERSIST 			级联保存
+CascadeType.MERGE 		级联更新			CascadeType.REMOVE 				级联删除
+CascadeType.REFRESH 	级联刷新			CascadeType.DETACH(JPA 2.0)		全分离
+
+属性 `fetch`对应类型为`FetchType`
+
+FetchType.LAZY 懒加载,	FetchType.EAGER 及时加载
 
 ### javax.persistence.EntityManagerFactory
 
