@@ -11,6 +11,7 @@ import javax.validation.Validator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.moon.tomee.bval.constraints.ZipCode;
 
 public class FooTest {
 	
@@ -29,7 +30,7 @@ public class FooTest {
 		Set<ConstraintViolation<Foo>> cvs = validator.validate(foo);
 		assertEquals("constraint violation size is 1?", 1, cvs.size());
 		for (ConstraintViolation<?> cv : cvs) {
-			assertEquals("violation message is?", "zip code may not be right", cv.getMessage());
+			assertEquals("violation message is?", ZipCode.MESSAGE, cv.getMessage());
 		}
 	}
 
