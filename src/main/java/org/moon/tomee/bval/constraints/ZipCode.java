@@ -22,11 +22,13 @@ import org.moon.tomee.bval.validator.ZipCodeValidator;
 @Constraint(validatedBy = { ZipCodeValidator.class })
 public @interface ZipCode {
 	
+	static final String MESSAGE = "zip code may not be right";
+	
 	int length() default 6;
 	
 	boolean nullable() default true;
 	
-    String message() default "zip code may not be right";
+    String message() default MESSAGE;
 
     Class<?>[] groups() default {};
 
