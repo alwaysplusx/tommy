@@ -1,25 +1,25 @@
 ### Java Transaction API
-#### EJB有两种的管理方式CMP(container managed persistence), BMP(bean managed persistence) 
+#### EJB有两种的事务管理方式CMT(Container-Managed Transactions), BMT(Bean-Managed Transactions) 
 
-CMP简单易用由EJB容器管理,包含事务和缓存机制 
+CMT简单易用由EJB容器管理,包含事务和缓存机制 
 
-BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动控制事务. 
+BMT灵活能由用户手动控制事务,用户使用`UserTransaction`来手动控制事务. 
 
 ### @TransactionManagement
 
-#### UserCMPDaoImpl.java `TransactionManagementType.CONTAINER`声明为CMP管理方式
+#### UserCMTDaoImpl.java `TransactionManagementType.CONTAINER`声明为CMT管理方式
 
 	@Stateless
 	@TransactionManagement(TransactionManagementType.CONTAINER)
-	public class UserCMPDaoImpl implements UserDao {
+	public class UserCMTDaoImpl implements UserDao {
 		//some code
 	}
 	
-#### UserBMPDaoImpl.java `TransactionManagementType.BEAN`声明为BMP管理方式
+#### UserBMTDaoImpl.java `TransactionManagementType.BEAN`声明为BMT管理方式
 
 	@Stateless
 	@TransactionManagement(TransactionManagementType.BEAN)
-	public class UserBMPDaoImpl implements UserDao {
+	public class UserBMTDaoImpl implements UserDao {
 		
 		@Resource
 		private UserTranaction ux;
@@ -36,26 +36,26 @@ BMP灵活能由用户手动控制事务,用户使用`UserTransaction`来手动�
 		}
 	}
 
-#### CMP与BMP相互引用时
+#### CMT与BMT相互引用时
 
-BMPDao 引用 CMPDao 中的saveUser方法实际效果参见[@TransactionAttribute.REQUIRED](https://github.com/superwuxin/tommy-test/blob/master/src/main/java/org/moon/tomee/jta/README.md#transactionattributetyperequired-transactionattribute%E7%9A%84%E9%BB%98%E8%AE%A4%E5%80%BC)
+BMTDao 引用 CMTDao 中的saveUser方法实际效果参见[@TransactionAttribute.REQUIRED](https://github.com/superwuxin/tommy-test/blob/master/src/main/java/org/moon/tomee/jta/README.md#transactionattributetyperequired-transactionattribute%E7%9A%84%E9%BB%98%E8%AE%A4%E5%80%BC)
 
-CMPDao 引用 BMPDao 中的saveUser方法时,如果CMPDao中出现异常则BMPDao部分的逻辑无法回滚
+CMTDao 引用 BMTDao 中的saveUser方法时,如果CMTDao中出现异常则BMTDao部分的逻辑无法回滚
 
-#### UserCMPDaoImpl.java
+#### UserCMTDaoImpl.java
 
 	@Stateless
 	@TransactionManagement(TransactionManagementType.CONTAINER)
-	public class UserCMPDaoImpl implements UserDao {
+	public class UserCMTDaoImpl implements UserDao {
 	
 		@PersistenceContext(unitName = "hibernate-moon")
 		private EntityManager em;
-		//引用BMP Dao
-		@EJB(beanName = "UserBMPDaoImpl")
+		//引用BMT Dao
+		@EJB(beanName = "UserBMTDaoImpl")
 		private UserDao userDao;
 	
 		@Override
-		public void saveWithBMPDao(User user1, User user2) {
+		public void saveWithBMTDao(User user1, User user2) {
 			em.persist(user1);
 			userDao.saveUser(user2);
 		}
@@ -66,29 +66,29 @@ CMPDao 引用 BMPDao 中的saveUser方法时,如果CMPDao中出现异常则BMPDa
 		}
 	
 		@Override
-		public void saveWithCMPDao(User user1, User user2) {
-			throw new RuntimeException("I'm CMP Dao");
+		public void saveWithCMTDao(User user1, User user2) {
+			throw new RuntimeException("I'm CMT Dao");
 		}
 	
 		//some other code
 	}
 
-#### UserBMPDaoImpl.java
+#### UserBMTDaoImpl.java
 
 	@Stateless
 	@TransactionManagement(TransactionManagementType.BEAN)
-	public class UserBMPDaoImpl implements UserDao {
+	public class UserBMTDaoImpl implements UserDao {
 	
 		@PersistenceContext(unitName = "hibernate-moon")
 		private EntityManager em;
 		@Resource
 		private UserTransaction ux;
-		//引用CMP Dao
-		@EJB(beanName = "UserCMPDaoImpl")
+		//引用CMT Dao
+		@EJB(beanName = "UserCMTDaoImpl")
 		private UserDao userDao;
 
 		@Override
-		public void saveWithCMPDao(User user1, User user2) {
+		public void saveWithCMTDao(User user1, User user2) {
 			try {
 				ux.begin();
 				em.persist(user1);
@@ -110,8 +110,8 @@ CMPDao 引用 BMPDao 中的saveUser方法时,如果CMPDao中出现异常则BMPDa
 		}
 	
 		@Override
-		public void saveWithBMPDao(User user1, User user2) {
-			throw new RuntimeException("I'm BMP Dao");
+		public void saveWithBMTDao(User user1, User user2) {
+			throw new RuntimeException("I'm BMT Dao");
 		}
 		
 		//some other code
@@ -124,11 +124,11 @@ CMPDao 引用 BMPDao 中的saveUser方法时,如果CMPDao中出现异常则BMPDa
 	
 		private EJBContainer container;
 		
-		@EJB(beanName = "UserCMPDaoImpl")
-		private UserDao userCMPDao;
+		@EJB(beanName = "UserCMTDaoImpl")
+		private UserDao userCMTDao;
 		
-		@EJB(beanName = "UserBMPDaoImpl")
-		private UserDao userBMPDao;
+		@EJB(beanName = "UserBMTDaoImpl")
+		private UserDao userBMTDao;
 	
 		@Before
 		public void setUp() throws Exception {
@@ -139,15 +139,15 @@ CMPDao 引用 BMPDao 中的saveUser方法时,如果CMPDao中出现异常则BMPDa
 		}
 		
 		@Test
-		public void testSaveWithCMPDao(){
-			userBMPDao.saveWithCMPDao(new User("AAA"), new User("BBB"));
-			assertEquals("save with CMP Dao", 2l, userBMPDao.count());
+		public void testSaveWithCMTDao(){
+			userBMTDao.saveWithCMTDao(new User("AAA"), new User("BBB"));
+			assertEquals("save with CMT Dao", 2l, userBMTDao.count());
 		}
 		
 		@Test
-		public void testSaveWithBMPDao(){
-			userCMPDao.saveWithBMPDao(new User("AAA"), new User("BBB"));
-			assertEquals("save with BMP Dao", 2l, userCMPDao.count());
+		public void testSaveWithBMTDao(){
+			userCMTDao.saveWithBMTDao(new User("AAA"), new User("BBB"));
+			assertEquals("save with BMT Dao", 2l, userCMTDao.count());
 		}
 		
 		@After
@@ -158,12 +158,12 @@ CMPDao 引用 BMPDao 中的saveUser方法时,如果CMPDao中出现异常则BMPDa
 
 ### @TransactionAttribute
 
-<i>`@TransactionAttribute`对于BMP类的Bean是无效的,在容器运行时会将BMP内的`@TransactionAttribute`注解忽略掉</i>
+<i>`@TransactionAttribute`对于BMT类的Bean是无效的,在容器运行时会将BMT内的`@TransactionAttribute`注解忽略掉</i>
 
 #### RUNNING
-	WARNING - WARN ... UserBMPDaoImpl:	Ignoring 1 invalid @TransactionAttribute annotations.  Bean not using Container-Managed Transactions.
+	WARNING - WARN ... UserBMTDaoImpl:	Ignoring 1 invalid @TransactionAttribute annotations.  Bean not using Container-Managed Transactions.
 
-所以下文均是对CMP类的Bean进行说明
+所以下文均是对CMT类的Bean进行说明
 
 #### TransactionAttributeType.REQUIRED @TransactionAttribute的默认值
 
@@ -176,7 +176,7 @@ CMPDao 引用 BMPDao 中的saveUser方法时,如果CMPDao中出现异常则BMPDa
 		//REQUIRED保存的对象被回滚了
 	}
 
-#### CMP中声明方法为`REQUIRED`	
+#### CMT中声明方法为`REQUIRED`	
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -189,8 +189,8 @@ CMPDao 引用 BMPDao 中的saveUser方法时,如果CMPDao中出现异常则BMPDa
 	public class UserDaoTest {
 	
 		private EJBContainer container;
-		@EJB(beanName = "UserCMPDaoImpl")
-		private UserDao userCMPDao;
+		@EJB(beanName = "UserCMTDaoImpl")
+		private UserDao userCMTDao;
 		@Resource
 		private UserTransaction ux;
 	
@@ -203,17 +203,17 @@ CMPDao 引用 BMPDao 中的saveUser方法时,如果CMPDao中出现异常则BMPDa
 		}
 	
 		@Test
-		public void testCMPSaveUser() throws Exception{
-			userCMPDao.saveUser(new User("AAA"));
-			assertEquals("Save user with CMP", 1l, userCMPDao.count());
+		public void testCMTSaveUser() throws Exception{
+			userCMTDao.saveUser(new User("AAA"));
+			assertEquals("Save user with CMT", 1l, userCMTDao.count());
 		}
 		
 		@Test
-		public void testCMPSaveUser1() throws Exception{
+		public void testCMTSaveUser1() throws Exception{
 			ux.begin();
-			userCMPDao.saveUser(new User("AAA"));
+			userCMTDao.saveUser(new User("AAA"));
 			ux.rollback();
-			assertEquals("Save user with CMP", 0l, userCMPDao.count());
+			assertEquals("Save user with CMT", 0l, userCMTDao.count());
 		}
 		
 		@After
@@ -232,11 +232,11 @@ CMPDao 引用 BMPDao 中的saveUser方法时,如果CMPDao中出现异常则BMPDa
 		ux.commit();
 	}
 
-#### CMP中声明方法为`MANDATORY` 直接调用失败  客户端中手动事务调用正常
+#### CMT中声明方法为`MANDATORY` 直接调用失败  客户端中手动事务调用正常
 
 	@Stateless
 	@TransactionManagement(TransactionManagementType.CONTAINER)
-	public class UserCMPDaoImpl implements UserDao {
+	public class UserCMTDaoImpl implements UserDao {
 		
 		@Override
 		@TransactionAttribute(TransactionAttributeType.MANDATORY)
@@ -251,8 +251,8 @@ CMPDao 引用 BMPDao 中的saveUser方法时,如果CMPDao中出现异常则BMPDa
 	public class UserDaoTest {
 	
 		private EJBContainer container;
-		@EJB(beanName = "UserCMPDaoImpl")
-		private UserDao userCMPDao;
+		@EJB(beanName = "UserCMTDaoImpl")
+		private UserDao userCMTDao;
 		@Resource
 		private UserTransaction ux;
 	
@@ -265,8 +265,8 @@ CMPDao 引用 BMPDao 中的saveUser方法时,如果CMPDao中出现异常则BMPDa
 		}
 	
 		@Test(expected = EJBTransactionRequiredException.class)
-		public void testCMPSaveUser() throws Exception{
-			userCMPDao.saveUser(new User("AAA"));
+		public void testCMTSaveUser() throws Exception{
+			userCMTDao.saveUser(new User("AAA"));
 			//调用结果为异常结束
 		}
 		
@@ -287,7 +287,7 @@ CMPDao 引用 BMPDao 中的saveUser方法时,如果CMPDao中出现异常则BMPDa
 		//结果为无法回滚REQUEST_NEW方法中保存的对象
 	}
 
-#### CMP中声明方法为`REQUEST_NEW` 直接调用正常 手动事务回滚无效
+#### CMT中声明方法为`REQUEST_NEW` 直接调用正常 手动事务回滚无效
 		
 		@Override
 		@TransactionAttribute(TransactionAttributeType.REQUEST_NEW)
@@ -300,8 +300,8 @@ CMPDao 引用 BMPDao 中的saveUser方法时,如果CMPDao中出现异常则BMPDa
 	public class UserDaoTest {
 	
 		private EJBContainer container;
-		@EJB(beanName = "UserCMPDaoImpl")
-		private UserDao userCMPDao;
+		@EJB(beanName = "UserCMTDaoImpl")
+		private UserDao userCMTDao;
 		@Resource
 		private UserTransaction ux;
 	
@@ -314,12 +314,12 @@ CMPDao 引用 BMPDao 中的saveUser方法时,如果CMPDao中出现异常则BMPDa
 		}
 	
 		@Test
-		public void testCMPSaveUser() throws Exception{
+		public void testCMTSaveUser() throws Exception{
 			ux.begin();
-			userCMPDao.saveUser(new User("AAA"));
+			userCMTDao.saveUser(new User("AAA"));
 			ux.rollback();
 			//无法回滚数据库中保存了一个User对象
-			assertEquals("Save user with CMP", 1l, userCMPDao.count());
+			assertEquals("Save user with CMT", 1l, userCMTDao.count());
 		}
 		
 		@After
@@ -342,7 +342,7 @@ Tip:调用声明为SUPPORTS的方法,如果该方法是需要提交事务的.那
 		ux.commit();
 	}
 	
-#### CMP中声明方法为`SUPPORTS`,直接调用异常
+#### CMT中声明方法为`SUPPORTS`,直接调用异常
 	
 	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	public void saveUser(User user) {
@@ -354,8 +354,8 @@ Tip:调用声明为SUPPORTS的方法,如果该方法是需要提交事务的.那
 	public class UserDaoTest {
 	
 		private EJBContainer container;
-		@EJB(beanName = "UserCMPDaoImpl")
-		private UserDao userCMPDao;
+		@EJB(beanName = "UserCMTDaoImpl")
+		private UserDao userCMTDao;
 		@Resource
 		private UserTransaction ux;
 	
@@ -368,16 +368,16 @@ Tip:调用声明为SUPPORTS的方法,如果该方法是需要提交事务的.那
 		}
 	
 		@Test(expected = EJBTransactionRequiredException.class)
-		public void testCMPSaveUser() throws Exception{
-			userCMPDao.saveUser(new User("AAA"));
+		public void testCMTSaveUser() throws Exception{
+			userCMTDao.saveUser(new User("AAA"));
 		}
 		
 		@Test
-		public void testCMPSaveUser1() throws Exception{
+		public void testCMTSaveUser1() throws Exception{
 			ux.begin();
-			userCMPDao.saveUser(new User("AAA"));
+			userCMTDao.saveUser(new User("AAA"));
 			ux.commit();
-			assertEquals("Save user with CMP", 1l, userCMPDao.count());
+			assertEquals("Save user with CMT", 1l, userCMTDao.count());
 		}
 		
 		@After
@@ -395,7 +395,7 @@ Tip:调用声明为SUPPORTS的方法,如果该方法是需要提交事务的.那
 
 所以`NOT_SUPPORTED`的方法内部不能存在有事务需求的代码
 
-#### CMP中声明方法为`NOT_SUPPORTED` 无事务需求的方法 直接调用正常 UserTransaction调用异常
+#### CMT中声明方法为`NOT_SUPPORTED` 无事务需求的方法 直接调用正常 UserTransaction调用异常
 
 	@Override
 	//这个声明是不正确的
@@ -415,8 +415,8 @@ Tip:调用声明为SUPPORTS的方法,如果该方法是需要提交事务的.那
 	public class UserDaoTest {
 	
 		private EJBContainer container;
-		@EJB(beanName = "UserCMPDaoImpl")
-		private UserDao userCMPDao;
+		@EJB(beanName = "UserCMTDaoImpl")
+		private UserDao userCMTDao;
 		@Resource
 		private UserTransaction ux;
 	
@@ -429,17 +429,17 @@ Tip:调用声明为SUPPORTS的方法,如果该方法是需要提交事务的.那
 		}
 	
 		@Test(expected = EJBException.class)//Transaction not supported
-		public void testCMPCount() throws Exception{
+		public void testCMTCount() throws Exception{
 			ux.begin();
-			userCMPDao.count();
+			userCMTDao.count();
 			ux.commit();
 		}
 		
 		@Test
-		public void testCMPCount() throws Exception{
-			userCMPDao.count();
+		public void testCMTCount() throws Exception{
+			userCMTDao.count();
 			ux.begin();
-			userCMPDao.count();
+			userCMTDao.count();
 			ux.commit();
 		}
 		
@@ -455,7 +455,7 @@ Tip:调用声明为SUPPORTS的方法,如果该方法是需要提交事务的.那
 
 Tip:声明为`NEVER`的方法内部也不能存在有事务需求的代码
 
-#### CMP中声明方法为`NEVER` 无事务需求的方法 直接调用正常 UserTransaction调用异常
+#### CMT中声明方法为`NEVER` 无事务需求的方法 直接调用正常 UserTransaction调用异常
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.NEVER)
@@ -468,8 +468,8 @@ Tip:声明为`NEVER`的方法内部也不能存在有事务需求的代码
 	public class UserDaoTest {
 	
 		private EJBContainer container;
-		@EJB(beanName = "UserCMPDaoImpl")
-		private UserDao userCMPDao;
+		@EJB(beanName = "UserCMTDaoImpl")
+		private UserDao userCMTDao;
 		@Resource
 		private UserTransaction ux;
 	
@@ -482,15 +482,15 @@ Tip:声明为`NEVER`的方法内部也不能存在有事务需求的代码
 		}
 	
 		@Test(expected = EJBException.class)//Transaction not supported
-		public void testCMPCount() throws Exception{
+		public void testCMTCount() throws Exception{
 			ux.begin();
-			userCMPDao.count();
+			userCMTDao.count();
 			ux.commit();
 		}
 		
 		@Test
-		public void testCMPCount1() throws Exception{
-			userCMPDao.count();
+		public void testCMTCount1() throws Exception{
+			userCMTDao.count();
 		}
 		
 		@After

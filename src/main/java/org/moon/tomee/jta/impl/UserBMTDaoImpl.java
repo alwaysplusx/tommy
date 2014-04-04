@@ -14,13 +14,13 @@ import org.moon.tomee.jta.UserDao;
 
 @Stateless
 @TransactionManagement(TransactionManagementType.BEAN)
-public class UserBMPDaoImpl implements UserDao {
+public class UserBMTDaoImpl implements UserDao {
 
 	@PersistenceContext(unitName = "hibernate-moon")
 	private EntityManager em;
 	@Resource
 	private UserTransaction ux;
-	@EJB(beanName = "UserCMPDaoImpl")
+	@EJB(beanName = "UserCMTDaoImpl")
 	private UserDao userDao;
 
 	@Override
@@ -57,7 +57,7 @@ public class UserBMPDaoImpl implements UserDao {
 	}
 
 	@Override
-	public void saveWithCMPDao(User user1, User user2) {
+	public void saveWithCMTDao(User user1, User user2) {
 		try {
 			ux.begin();
 			em.persist(user1);
@@ -79,8 +79,8 @@ public class UserBMPDaoImpl implements UserDao {
 	}
 
 	@Override
-	public void saveWithBMPDao(User user1, User user2) {
-		throw new RuntimeException("I'm BMP Dao");
+	public void saveWithBMTDao(User user1, User user2) {
+		throw new RuntimeException("I'm BMT Dao");
 	}
 
 }

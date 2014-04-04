@@ -18,10 +18,10 @@ import org.moon.tomee.jpa.persistence.User;
 public class UserDaoTest {
 
 	private EJBContainer container;
-	@EJB(beanName = "UserCMPDaoImpl")
-	private UserDao userCMPDao;
-	@EJB(beanName = "UserBMPDaoImpl")
-	private UserDao userBMPDao;
+	@EJB(beanName = "UserCMTDaoImpl")
+	private UserDao userCMTDao;
+	@EJB(beanName = "UserBMTDaoImpl")
+	private UserDao userBMTDao;
 	@Resource
 	private UserTransaction ux;
 
@@ -36,45 +36,45 @@ public class UserDaoTest {
 	@Test
 	@Ignore
 	public void testSaveUser() {
-		userCMPDao.saveUser(new User("AAA"));
-		userBMPDao.saveUser(new User("BBB"));
-		assertEquals("Save user with CMP & BMP", 2l, userBMPDao.count());
+		userCMTDao.saveUser(new User("AAA"));
+		userBMTDao.saveUser(new User("BBB"));
+		assertEquals("Save user with CMT & BMT", 2l, userBMTDao.count());
 	}
 	
 	@Test
 	@Ignore
-	public void testCMPSaveUser() throws Exception{
+	public void testCMTSaveUser() throws Exception{
 		//ux.begin();
-		userCMPDao.saveUser(new User("AAA"));
+		userCMTDao.saveUser(new User("AAA"));
 		//ux.commit();
-		assertEquals("Save user with CMP", 1l, userBMPDao.count());
+		assertEquals("Save user with CMT", 1l, userBMTDao.count());
 	}
 	
 	@Test
 	@Ignore
-	public void testCMPCount() throws Exception{
+	public void testCMTCount() throws Exception{
 		ux.begin();
-		userCMPDao.saveUser(new User("AAA"));;
+		userCMTDao.saveUser(new User("AAA"));;
 		ux.commit();
 	}
 	
 	@Test
 	@Ignore
-	public void testBMPSaveUser() throws Exception{
+	public void testBMTSaveUser() throws Exception{
 		ux.begin();
-		userBMPDao.saveUser(new User("AAA"));
+		userBMTDao.saveUser(new User("AAA"));
 		ux.commit();
-		assertEquals("Save user with BMP", 1l, userBMPDao.count());
+		assertEquals("Save user with BMT", 1l, userBMTDao.count());
 	}
 	
 	@Test
-	public void testSaveWithCMPDao(){
-		userBMPDao.saveWithCMPDao(new User("AAA"), new User("BBB"));
-		assertEquals("save with CMP Dao", 2l, userBMPDao.count());
+	public void testSaveWithCMTDao(){
+		userBMTDao.saveWithCMTDao(new User("AAA"), new User("BBB"));
+		assertEquals("save with CMT Dao", 2l, userBMTDao.count());
 	}
 	
-	public void testSaveWithBMPDao(){
-		userCMPDao.saveWithBMPDao(new User("AAA"), new User("BBB"));
+	public void testSaveWithBMTDao(){
+		userCMTDao.saveWithBMTDao(new User("AAA"), new User("BBB"));
 	}
 	
 	@After

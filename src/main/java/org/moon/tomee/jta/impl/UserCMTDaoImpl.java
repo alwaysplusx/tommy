@@ -12,11 +12,11 @@ import org.moon.tomee.jta.UserDao;
 
 @Stateless
 @TransactionManagement(TransactionManagementType.CONTAINER)
-public class UserCMPDaoImpl implements UserDao {
+public class UserCMTDaoImpl implements UserDao {
 
 	@PersistenceContext(unitName = "hibernate-moon")
 	private EntityManager em;
-	@EJB(beanName = "UserBMPDaoImpl")
+	@EJB(beanName = "UserBMTDaoImpl")
 	private UserDao userDao;
 	
 	@Override
@@ -30,7 +30,7 @@ public class UserCMPDaoImpl implements UserDao {
 	}
 
 	@Override
-	public void saveWithBMPDao(User user1, User user2) {
+	public void saveWithBMTDao(User user1, User user2) {
 		em.persist(user1);
 		userDao.saveUser(user2);
 	}
@@ -41,8 +41,8 @@ public class UserCMPDaoImpl implements UserDao {
 	}
 
 	@Override
-	public void saveWithCMPDao(User user1, User user2) {
-		throw new RuntimeException("I'm CMP Dao");
+	public void saveWithCMTDao(User user1, User user2) {
+		throw new RuntimeException("I'm CMT Dao");
 	}
 
 }
