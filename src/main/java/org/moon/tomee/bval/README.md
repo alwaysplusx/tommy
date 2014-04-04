@@ -157,7 +157,7 @@ Bar内定义了Foo,使用`@Valid`注解当检验Bar时将会级联检验Foo是�
 
 Bean Validation 规范允许将不同的约束进行组合来创建级别较高且功能较多的约束，从而避免原子级别约束的重复使用
 
-检验时将会对用户自定义的约束上面前的`@NotNull` `@Size`先进行验证
+检验时将会对用户自定义的约束上的`@NotNull` `@Size`先进行验证
 
 	@NotNull(message = "idcard can't be null")
 	@Size(min = 15, max = 18, message = "idcard length may not be right")
@@ -174,6 +174,31 @@ Bean Validation 规范允许将不同的约束进行组合来创建级别较高�
 		Class<? extends Payload>[] payload() default {};
 	
 	}
+
+<b>Citizen.java</b>
+
+	public class Citizen {
+	
+		@IDCard
+		private String idCard;
+	}	
+
+<b>CitizenTest.java</b>
+
+	@Test
+	public void testCitizen() {
+		Citizen citizen = new Citizen();
+		//citizen.setIdCard("111111111111111");
+		Set<ConstraintViolation<Citizen>> cvs = validator.validate(citizen);
+		for(ConstraintViolation<?> cv : cvs){
+			System.out.println(cv.getMessage());
+		}
+		assertEquals("violation is not empty", false, cvs.isEmpty());
+	}
+
+<b>Test Result</b>
+
+	idcard can't be null
 
 ### 组
 
