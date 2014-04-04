@@ -26,6 +26,9 @@ public class CitizenTest {
 		Citizen citizen = new Citizen();
 		//citizen.setIdCard("111111111111111");
 		Set<ConstraintViolation<Citizen>> cvs = validator.validate(citizen);
+		for(ConstraintViolation<?> cv : cvs){
+			System.out.println(cv.getMessage());
+		}
 		assertEquals("violation is not empty", false, cvs.isEmpty());
 	}
 
