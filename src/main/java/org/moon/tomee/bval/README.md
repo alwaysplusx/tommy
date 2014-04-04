@@ -12,7 +12,7 @@ javax.validation.constraints包下包括`@NotNull` `@Null` `@Size` `@Min` `@Max`
 
 `@Constraint`用于指定检验的执行者,检验者均实现`javax.validation.ConstraintValidator`
 
-ZipCode.java
+<b>ZipCode.java</b>
 
 	@Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER })
 	@Retention(RetentionPolicy.RUNTIME)
@@ -51,7 +51,7 @@ ZipCode.java
 		}
 	}
 
-Foo.java
+<b>Foo.java</b>
 
 Foo中zipCode使用`@ZipCode`表明该值需要检验
 
@@ -63,7 +63,7 @@ Foo中zipCode使用`@ZipCode`表明该值需要检验
 		//some other code
 	}	
 
-FooTest.java
+<b>FooTest.java</b>
 
 	public class FooTest {
 		
@@ -95,14 +95,14 @@ FooTest.java
 
 Bar内定义了Foo,使用`@Valid`注解当检验Bar时将会级联检验Foo是否符合要求
 
-Bar.java
+<b>Bar.java</b>
 
 	public class Bar {
 		@Valid
 		private Foo foo;
 	}
 
-BarTest.java
+<b>BarTest.java</b>
 	
 	@Test
 	public void testBar() {
@@ -114,9 +114,167 @@ BarTest.java
 	
 ### 多值约束 Multiple Constraints
 
+<b>Contains.java</b>
+
+	@Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER })
+	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
+	@Constraint(validatedBy = { ContainsValidator.class })
+	public @interface Contains {
+	
+		String content() default "";
+	
+		String message() default "may not be contain declare content";
+	
+		Class<?>[] groups() default {};
+	
+		Class<? extends Payload>[] payload() default {};
+		
+		@Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER })
+		@Retention(RUNTIME)
+		@Documented
+		@interface List {
+			Contains[] value();
+		}
+	}
+
+<b>Baz.java</b>
+
+	public class Baz {
+
+		@Contains.List(
+			value = {
+				@Contains(content = "this is automata"),
+				@Contains(content = "this is manual machines") 
+			}
+		)
+		private String text;
+	}
+
+> 多值约束条件为AND,如果中@Contains.List有一条@Contains不符合要求还是有检验异常消息
+
 ### 组合约束
+
+Bean Validation 规范允许将不同的约束进行组合来创建级别较高且功能较多的约束，从而避免原子级别约束的重复使用
+
+检验时将会对用户自定义的约束上面前的`@NotNull` `@Size`先进行验证
+
+	@NotNull(message = "idcard can't be null")
+	@Size(min = 15, max = 18, message = "idcard length may not be right")
+	@Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER })
+	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
+	@Constraint(validatedBy = { IDCardValidator.class })
+	public @interface IDCard {
+	
+		String message() default "idcard is may not be right";
+	
+		Class<?>[] groups() default {};
+	
+		Class<? extends Payload>[] payload() default {};
+	
+	}
 
 ### 组
 
+Bean Validation 规范中组定义了约束的子集。对于一个给定的 Object Graph 结构，有了组的概念，则无需对该 Object Graph 中所有的约束进行验证，只需要对该组定义的一个子集进行验证即可。
+
+<b>Animal.java</b>
+
+	public interface Animal {
+		@NotNull(message = "animal name may not be null")
+		String getName();
+		@NotNull(message = "animal ownerName may not be null")
+		String getOwnerName();
+	}
+
+<b>Dog.java</b>
+	
+	public class Dog implements Animal {
+	
+		private String name;
+		private String ownerName;
+		@NotNull(message = "dog type may not be empty")
+		private String type;
+		@NotNull(message = "dog age may not be empty", groups = { Animal.class })
+		private Integer age;
+	}
+	
+<b>DogTest.java</b>	
+
+	@Test
+	public void testDog() {
+		Dog dog = new Dog();
+		Set<ConstraintViolation<Dog>> cvs = validator.validate(dog, Animal.class);
+		for(ConstraintViolation<?> cv : cvs){
+			System.out.println(cv.getMessage());
+		}
+		assertEquals("violation size is 3", 3, cvs.size());
+	}
+
+<b>Test Result</b>
+
+	animal ownerName may not be null
+	dog age may not be empty
+	animal name may not be null
+	
+> 组别验证需要在约束声明时进行组别的声明，否则使用默认的组 Default.class.
+
 ### 组序列
+
+默认情况下，不同组别的约束验证是无序的，然而在某些情况下，约束验证的顺序却很重要
+
+如下面两个例子：
+（1）第二个组中的约束验证依赖于一个稳定状态来运行，而这个稳定状态是由第一个组来进行验证的。
+（2）某个组的验证比较耗时，CPU 和内存的使用率相对比较大，最优的选择是将其放在最后进行验证。
+
+因此，在进行组验证的时候尚需提供一种有序的验证方式，这就提出了组序列的概念。
+
+一个组可以定义为其他组的序列，使用它进行验证的时候必须符合该序列规定的顺序。
+在使用组序列验证的时候，如果序列前边的组验证失败，则后面的组将不再给予验证。	
+	
+<b>Group interface</b>
+
+	interface FirstNameGroup {
+	}
+	
+	interface MiddleNameGroup {
+	}
+	
+	interface LastNameGroup {
+	}
+	
+<b>MyGroup.java</b>
+	
+	@GroupSequence(value = { FirstNameGroup.class, MiddleNameGroup.class, LastNameGroup.class })
+	public interface MyGroup {
+	
+	}
+
+<b>Username.java</b>	
+
+	public class Username {
+		@NotNull(message = "first name may not be null", groups = { FirstNameGroup.class })
+		private String firstName;
+		@NotNull(message = "middle name may not be null", groups = { MiddleNameGroup.class })
+		private String middleName;
+		@NotNull(message = "last name may not be null", groups = { LastNameGroup.class })
+		private String lastName;
+	}
+	
+<b>Username.Test</b>	
+
+	@Test
+	public void testUsername() {
+		Username username = new Username();
+		Set<ConstraintViolation<Username>> cvs = validator.validate(username, MyGroup.class);
+		for (ConstraintViolation<?> cv : cvs) {
+			System.out.println(cv.getMessage());
+		}
+		assertEquals("violation size is 1", 1, cvs.size());
+	}
+	
+<b>Test Result</b>	
+
+	first name may not be null
 	
