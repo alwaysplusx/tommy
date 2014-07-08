@@ -32,7 +32,7 @@ public class UserRepositoryImpl implements UserRepository {
 
 	@Override
 	public long count() {
-		return (long) em.createQuery("select count(o) from User o").getSingleResult();
+		return (Long) em.createQuery("select count(o) from User o").getSingleResult();
 	}
 
 	@Override
