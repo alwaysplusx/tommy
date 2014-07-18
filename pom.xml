@@ -22,11 +22,11 @@
 			<artifactId>eclipselink</artifactId>
 			<version>${eclipselink.version}</version>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>javax.jms</groupId>
 			<artifactId>javax.jms-api</artifactId>
 			<version>${jms.version}</version>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>org.apache.openejb</groupId>
 			<artifactId>openejb-core</artifactId>
