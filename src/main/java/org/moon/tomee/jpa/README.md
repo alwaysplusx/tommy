@@ -1,14 +1,14 @@
 ### Java Persistence API
 
-### 实体Bean(Entity Bean) 
+### 实体Bean(Entity Bean)
 
-通过注解 `@Entity`将一个类解析为实体Bean 
+通过注解 `@Entity`将一个类解析为实体Bean
 
 在通过`@Table`中的`name`属性关联数据库表.
 
 每个Entity Bean都必须指定`@Id`.
 
-ID的生成策略有多种 `GenerationType.IDENTITY` `GenerationType.AUTO` `GenerationType.SEQUENCE` `GenerationType.TABLE` 
+ID的生成策略有多种 `GenerationType.IDENTITY` `GenerationType.AUTO` `GenerationType.SEQUENCE` `GenerationType.TABLE`
 
 ### 数据库表关系的对应
 
@@ -16,95 +16,99 @@ ID的生成策略有多种 `GenerationType.IDENTITY` `GenerationType.AUTO` `Gene
 
 ##### Person.java 关系的维护端
 
-使用`OneToOne`注解 
+使用`OneToOne`注解
 
 关系维护端配置一个`mappedBy`引用被维护端内的自己.
-
-	@Entity
-	public class Person {
-		@OneToOne(mappedBy = "person")
-		private Passport passport;
-		//some other code
-	}
-
+```java
+@Entity
+public class Person {
+	@OneToOne(mappedBy = "person")
+	private Passport passport;
+	//some other code
+}
+```
 ##### Passport.java 被维护端
 
-使用`OneToOne`注解 
+使用`OneToOne`注解
 
 关系被维护端中使用`@JoinColumn`配置一个外键引用关系的维护端:在Passport表中添加一个personId引用Person中的personId
-	
-	@Entity
-	public class Passport {
-		@OneToOne
-		@JoinColumn(name = "personId", referencedColumnName = "personId")
-		private Person person;
-		//some other code
-	}
-
+```java
+@Entity
+public class Passport {
+	@OneToOne
+	@JoinColumn(name = "personId", referencedColumnName = "personId")
+	private Person person;
+	//some other code
+}
+```
 ##### Person Passport 对应表结构
-	
-	CREATE TABLE t_person (
-	  personId bigint(20) NOT NULL auto_increment,
-	  name varchar(255) default NULL,
-	  PRIMARY KEY  (personId)
-	);
-	
-	CREATE TABLE t_passport (
-	  passportId bigint(20) NOT NULL auto_increment,
-	  country varchar(255) default NULL,
-	  personId bigint(20) default NULL,
-	  PRIMARY KEY  (passportId),
-	  KEY FK_m2cmx2fwtt0i8y07h9bnr0elt (personId)
-	);
 
->关系配置要讲求实际 如:可以因为一个人而创建一个新的护照,而不能因为一个护照而重新创建一个人.[CascadeType](https://github.com/superwuxin/tommy-test/tree/master/src/main/java/org/moon/tomee/jpa#cascadetype)
+```sql
+CREATE TABLE t_person (
+  personId bigint(20) NOT NULL auto_increment,
+  name varchar(255) default NULL,
+  PRIMARY KEY  (personId)
+);
+
+CREATE TABLE t_passport (
+  passportId bigint(20) NOT NULL auto_increment,
+  country varchar(255) default NULL,
+  personId bigint(20) default NULL,
+  PRIMARY KEY  (passportId),
+  KEY FK_m2cmx2fwtt0i8y07h9bnr0elt (personId)
+);
+```
+
+>关系配置要讲求实际 如:可以因为一个人而创建一个新的护照,而不能因为一个护照而重新创建一个人.
+
+>详细见[CascadeType](https://github.com/wuxii/tommy/tree/master/src/main/java/org/moon/tomee/jpa#cascadetype)
 
 #### 一对多` @OneToMany` `@ManyToOne`
 
 ##### Order.java 一方 关系的维护端
 
-一方中使用`@OneToMany`注解 
+一方中使用`@OneToMany`注解
 
 属性`mappedBy`指定多方内的自己
-
-	@Entity
-	public class Order {
-		@OneToMany(mappedBy = "order")
-		private Collection<OrderItem> items;
-		//some other code
-	}
-	
+```java
+@Entity
+public class Order {
+	@OneToMany(mappedBy = "order")
+	private Collection<OrderItem> items;
+	//some other code
+}
+```
 ##### OrderItem.java 多方 关系的被维护端
 
 多方中使用`ManyToOne`注解
 
 并使用`@JoinColumn`配置一个外键引用:在OrderItem表中加一个字段orderId外键引用Order内的OrderId
-
-	@Entity
-	public class OrderItem {
-		@ManyToOne
-		@JoinColumn(name = "orderId", referencedColumnName = "orderId")
-		//some other code
-	}		
-	
+```java
+@Entity
+public class OrderItem {
+	@ManyToOne
+	@JoinColumn(name = "orderId", referencedColumnName = "orderId")
+	//some other code
+}
+```
 ##### Order OrderItem 对应表结构
+```sql
+CREATE TABLE t_order (
+  orderId bigint(20) NOT NULL auto_increment,
+  SerialNo varchar(255) default NULL,
+  createTime datetime default NULL,
+  PRIMARY KEY  (orderId)
+);
 
-	CREATE TABLE t_order (
-	  orderId bigint(20) NOT NULL auto_increment,
-	  SerialNo varchar(255) default NULL,
-	  createTime datetime default NULL,
-	  PRIMARY KEY  (orderId)
-	);
-	
-	
-	CREATE TABLE t_orderitem (
-	  itemId bigint(20) NOT NULL auto_increment,
-	  itemName varchar(255) default NULL,
-	  orderId bigint(20) default NULL,
-	  PRIMARY KEY  (itemId),
-	  KEY FK_3utxcx17lbsodl51xj5lum7ub (orderId)
-	);	
-	
+
+CREATE TABLE t_orderitem (
+  itemId bigint(20) NOT NULL auto_increment,
+  itemName varchar(255) default NULL,
+  orderId bigint(20) default NULL,
+  PRIMARY KEY  (itemId),
+  KEY FK_3utxcx17lbsodl51xj5lum7ub (orderId)
+);
+```
 #### 多对多` @ManyToMany`
 
 多对多通过一个关系表来指定两方之间的多对多的关系,关联时通过`@JoinTable`来指定关联的表.
@@ -122,56 +126,57 @@ ID的生成策略有多种 `GenerationType.IDENTITY` `GenerationType.AUTO` `Gene
 使用`@ManyToMany`注解
 
 并使用`@JoinTable`配置一个关系表 `@JoinTable.name`指定关系表的表名 `@JoinTable.joinColumn`指定关系维护端的引用 `@JoinTable.inverseJoinColumns`指定关系被维护端的引用
-
-	@Entity
-	public class Teacher {
-		@ManyToMany
-		@JoinTable(
-			name = "t_teacher_student", 
-			joinColumns = { @JoinColumn(name = "teacherId", referencedColumnName = "teacherId") }, 
-			inverseJoinColumns = { @JoinColumn(name = "studentId", referencedColumnName = "studentId") }
-		)
-		private Collection<Student> students;
-		//some other code
-	}	
-
+```java
+@Entity
+public class Teacher {
+	@ManyToMany
+	@JoinTable(
+		name = "t_teacher_student",
+		joinColumns = { @JoinColumn(name = "teacherId", referencedColumnName = "teacherId") },
+		inverseJoinColumns = { @JoinColumn(name = "studentId", referencedColumnName = "studentId") }
+	)
+	private Collection<Student> students;
+	//some other code
+}
+```
 ##### Student.java 被维护端
 
-使用`@ManyToMany`注解 
+使用`@ManyToMany`注解
 
 `@ManyToMany.mappedBy`指定维护端内部的自己
 
-	@Entity
-	public class Student {
-		@ManyToMany(mappedBy = "students")
-		private Collection<Teacher> teachers;
-		//some other code
-	}
-	
+```java
+@Entity
+public class Student {
+	@ManyToMany(mappedBy = "students")
+	private Collection<Teacher> teachers;
+	//some other code
+}
+```
 ##### Teacher Student 对应表结构
+```sql
+CREATE TABLE t_teacher (
+  teacherId bigint(20) NOT NULL auto_increment,
+  teacherName varchar(255) default NULL,
+  PRIMARY KEY  (teacherId)
+);
 
-	CREATE TABLE t_teacher (
-	  teacherId bigint(20) NOT NULL auto_increment,
-	  teacherName varchar(255) default NULL,
-	  PRIMARY KEY  (teacherId)
-	);
-	
-	CREATE TABLE t_student (
-	  studentId bigint(20) NOT NULL auto_increment,
-	  studentName varchar(255) default NULL,
-	  PRIMARY KEY  (studentId)
-	);
-	
-	CREATE TABLE t_teacher_student (
-	  teacherId bigint(20) NOT NULL,
-	  studentId bigint(20) NOT NULL,
-	  KEY FK_9nqofr30yvta09oo0l7esk7o1 (studentId),
-	  KEY FK_s745w6jseag65iv8n0c05pqly (teacherId)
-	);	
+CREATE TABLE t_student (
+  studentId bigint(20) NOT NULL auto_increment,
+  studentName varchar(255) default NULL,
+  PRIMARY KEY  (studentId)
+);
 
+CREATE TABLE t_teacher_student (
+  teacherId bigint(20) NOT NULL,
+  studentId bigint(20) NOT NULL,
+  KEY FK_9nqofr30yvta09oo0l7esk7o1 (studentId),
+  KEY FK_s745w6jseag65iv8n0c05pqly (teacherId)
+);
+```
 ### JPA中各个注解及注解属性说明
 
-#### @Entity 将类解析为一个实体Bean 
+#### @Entity 将类解析为一个实体Bean
 
 > 属性`name`(可选)指定Entity Bean的名称.如指定了`name`属性值,那么JPQL语句查询时就应为指定的name值
 
@@ -189,11 +194,11 @@ CascadeType.ALL                 全关联
 
 CascadeType.PERSIST             级联保存
 
-CascadeType.MERGE               级联更新			
+CascadeType.MERGE               级联更新
 
 CascadeType.REMOVE              级联删除
 
-CascadeType.REFRESH             级联刷新			
+CascadeType.REFRESH             级联刷新
 
 CascadeType.DETACH(JPA 2.0)     全分离
 
@@ -205,7 +210,7 @@ FetchType.EAGER                 及时加载
 
 ### javax.persistence.EntityManagerFactory
 
-JPA使用时通过`Persistence.createEntityManagerFactory(persistenceUnitName)`创建EntityManagerFactory. 
+JPA使用时通过`Persistence.createEntityManagerFactory(persistenceUnitName)`创建EntityManagerFactory.
 
 Persistence通过配置文件`classpath:/META-INF/persistence.xml`查找指定的Provider来加载JPA的实现.
 
